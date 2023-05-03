@@ -1,6 +1,7 @@
 import express from "express";
 import mongoose from "mongoose";
 import { config } from "dotenv";
+import userRouter from "./routers/userRouter.js";
 
 config();
 
@@ -13,6 +14,13 @@ const main = async () => {
         req.header("Access-Control-Access-Origin", "*");
         next();
       });
+
+      app.use(
+        express.json(),
+        express.urlencoded({ extended: false }),
+        userRouter
+      );
+
       console.log("conneceted to the database");
     });
     app.listen(2021, () => console.log("connected to port 2021"));
