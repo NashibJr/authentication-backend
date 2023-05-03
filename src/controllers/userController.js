@@ -8,8 +8,21 @@ const UserController = {
         student: data,
       });
     } catch (error) {
-      return resp.status(401).json({
+      return resp.status(400).json({
         message: "failed to ceate account",
+      });
+    }
+  },
+
+  handleLogin: async (req, resp, next) => {
+    try {
+      const data = await UserService.login(req.body);
+      return resp.status(200).json({
+        user: data,
+      });
+    } catch (error) {
+      return resp.status(400).json({
+        message: "An error has occured",
       });
     }
   },
