@@ -1,5 +1,5 @@
-import User from "../database/models/user.js";
 import * as bcrypt from "bcrypt";
+import User from "../database/models/user.js";
 
 const UserService = {
   createUser: async (userdata) => {
@@ -9,7 +9,7 @@ const UserService = {
 
       if (exists) {
         return {
-          message: "Account already exists. Forgot password?",
+          message: "Account with the username already exists. Forgot password?",
         };
       } else {
         const hashedPassword = await bcrypt.hash(userdata.password, 10);
