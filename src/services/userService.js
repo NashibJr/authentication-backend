@@ -10,7 +10,7 @@ const UserService = {
 
       if (exists) {
         return {
-          message: "Account with the username already exists. Forgot password?",
+          message: "Account with the username already exists",
         };
       } else {
         const hashedPassword = await bcrypt.hash(userdata.password, 10);
@@ -40,14 +40,16 @@ const UserService = {
       "email",
     ]);
     if (!user) {
-      return null;
+      return {
+        message: "Account with that username is not available",
+      };
     } else {
       // check if the user has provided the correct credentials.
 
       const correctCredentials = await bcrypt.compare(password, user.password);
       if (!correctCredentials) {
         return {
-          message: "Password is incorrect. Forgot password?",
+          message: "Password is incorrect",
         };
       } else {
         //generate a token
@@ -64,6 +66,10 @@ const UserService = {
         return { ...user, token: token };
       }
     }
+  },
+
+  getUsers: async () => {
+    return await User.find({}).sort({ username: 1 });
   },
 };
 
