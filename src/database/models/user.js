@@ -13,6 +13,8 @@ const userSchema = new Schema({
     type: String,
     required: true,
   },
+  status: String,
+  activationCode: { type: Number },
 });
 
 const User = mongoose.model("user", userSchema);

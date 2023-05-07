@@ -1,6 +1,8 @@
 import * as bcrypt from "bcrypt";
 import User from "../database/models/user.js";
 import Jwt from "jsonwebtoken";
+import nodemailerSendgrid from "nodemailer-sendgrid";
+import nodemailer from "nodemailer";
 
 const UserService = {
   createUser: async (userdata) => {
@@ -14,11 +16,33 @@ const UserService = {
         };
       } else {
         const hashedPassword = await bcrypt.hash(userdata.password, 10);
-        let user = await User.create({ ...userdata, password: hashedPassword });
+        //create a token which will be used to send the comfirmation email to the user.
+        const { email, username } = userdata;
+        const token = Jwt.sign({ email, username }, process.env.JWT_SECRET, {
+          expiresIn: "2 days",
+        });
+
+        // send the activation email to the user.
+        const activationCode = (Math.random() * 10000000).toFixed(0);
+        let user = await User.create({
+          ...userdata,
+          password: hashedPassword,
+          status: "not activated",
+          activationCode: activationCode,
+        });
+        const transport = nodemailer.createTransport(
+          nodemailerSendgrid({ apiKey: process.env.SENDGRID_API_KEY })
+        );
+        transport.sendMail({
+          from: "nashib.kigoonya@students.mak.ac.ug",
+          to: email,
+          subject: "Activation code",
+          html: `Your activation code is ${activationCode}`,
+        });
         user = user.toJSON();
         const { password, ...rest } = user;
 
-        return rest;
+        return { ...rest, token: token };
       }
     } catch (error) {
       return {
@@ -38,6 +62,7 @@ const UserService = {
       "username",
       "password",
       "email",
+      "status",
     ]);
     if (!user) {
       return {
@@ -54,12 +79,20 @@ const UserService = {
       } else {
         //generate a token
 
-        const { _id, username, email } = user;
+        const { _id, username, email, status } = user;
         const token = Jwt.sign(
-          { _id, username, email },
+          { _id, username, email, status },
           process.env.JWT_SECRET,
           { expiresIn: "2h" }
         );
+
+        // check if the users account is activated or not.
+
+        if (status !== "activated") {
+          return {
+            message: "Your account is not activated!",
+          };
+        }
         user = user.toJSON();
         delete user.password;
 
@@ -69,7 +102,14 @@ const UserService = {
   },
 
   getUsers: async () => {
-    return await User.find({}).sort({ username: 1 });
+    return await User.find({}).sort({ username: 1 }).limit(10);
+  },
+
+  activateAccount: async (email, activationCode) => {
+    const user = User.findOne({ email: email }).select(
+      "email activationCode username"
+    );
+    return user;
   },
 };
 
