@@ -7,7 +7,7 @@ const UserController = {
     try {
       const data = await UserService.createUser(req.body);
       return resp.status(201).json({
-        student: data,
+        user: data,
       });
     } catch (error) {
       return resp.status(400).json({

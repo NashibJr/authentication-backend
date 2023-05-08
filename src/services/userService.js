@@ -9,10 +9,15 @@ const UserService = {
     try {
       //check if the user already exists on the database
       const exists = await User.findOne({ username: userdata.username });
+      const existsEmail = await User.findOne({ email: userdata.email });
 
       if (exists) {
         return {
           message: "Account with the username already exists",
+        };
+      } else if (existsEmail) {
+        return {
+          message: "Account with that email already exists",
         };
       } else {
         const hashedPassword = await bcrypt.hash(userdata.password, 10);
