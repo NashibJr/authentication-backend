@@ -12,14 +12,21 @@ const authenticate = async (req, resp, next) => {
       });
     } else {
       const payload = Jwt.verify(token, process.env.JWT_SECRET);
-      console.log(payload);
-      const user = await User.findById(payload._id);
+      const { _id, status } = payload;
+      const user = await User.findById(_id);
       if (!user) {
         return resp.status(400).json({
           message: "you are not authorized",
         });
       } else {
-        return next();
+        if (status === "not activated") {
+          return resp.status(500).json({
+            message:
+              "Your account is not activated!. Check your email for the actiavtion code and activate your account",
+          });
+        } else {
+          return next();
+        }
       }
     }
   } catch (error) {
