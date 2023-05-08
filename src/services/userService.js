@@ -88,11 +88,6 @@ const UserService = {
 
         // check if the users account is activated or not.
 
-        if (status !== "activated") {
-          return {
-            message: "Your account is not activated!",
-          };
-        }
         user = user.toJSON();
         delete user.password;
 
@@ -102,7 +97,11 @@ const UserService = {
   },
 
   getUsers: async () => {
-    return await User.find({}).sort({ username: 1 }).limit(10);
+    let users = await User.find({})
+      .sort({ username: 1 })
+      .limit(10)
+      .select("_id username email status activationCode");
+    return users;
   },
 
   activateAccount: async (email, activationCode) => {

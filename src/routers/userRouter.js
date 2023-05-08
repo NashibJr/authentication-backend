@@ -16,7 +16,7 @@ userRouter.post(
 );
 userRouter.post("/users/login", UserController.handleLogin);
 userRouter.get("/users/getusers", authenticate, UserController.getAllUsers);
-userRouter.get(
+userRouter.post(
   "/users/comfirm",
   (req, resp, next) => validateInputs(req, resp, next)(activationCodeSchema),
   UserController.activateUserAccount
